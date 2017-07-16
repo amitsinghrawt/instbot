@@ -31,8 +31,8 @@ def self_info():
     #this fuction is use for showing the recent post owner
 def get_own_post():
     try:
-      request_url = (BASE_URL + 'users/self/media/recent/?access_token=%s') % (APP_ACCESS_TOKEN)
-      print colored('GET request url : %s','green' % (request_url))
+      request_url =(BASE_URL + 'users/self/media/recent/?access_token=%s') % (APP_ACCESS_TOKEN)
+      print 'GET request url : %s'%request_url
       own_media = requests.get(request_url).json()
     except:
         print colored("get request is not working","red")
@@ -46,7 +46,7 @@ def get_own_post():
             else:
                 print colored('Post does not exist!','red')
         else:
-            print colored ('Status code other than 200 received!','green')
+          print colored ('Status code other than 200 received!','green')
     except:
         KeyError
 #this fuction is use for collting the informtion of other user
@@ -62,8 +62,7 @@ def get_user_id(insta_username):
         if len(user_info['data']):
             return user_info['data'][0]['id']
         else:
-             return None
-
+         return None
       else:
         print 'Status code other than 200 received!'
         exit()
@@ -71,32 +70,32 @@ def get_user_id(insta_username):
         KeyError
 #this fuction is use for geting the recent post of instagram user
 def get_user_post(insta_username):
-  user_id = get_user_id(insta_username)
-  if user_id == None:
-    print 'User does not exist!'
-    exit()
-  else:
-    try:
-      request_url = (BASE_URL + 'users/%s/media/recent/?access_token=%s') % (user_id, APP_ACCESS_TOKEN)
-      print 'GET request url : %s' % (request_url)
-      user_media = requests.get(request_url).json()
-    except:
-        print"get request is not working"
-    try:
-      if user_media['meta']['code'] == 200:
-        if len(user_media['data']):
-          image_name = user_media['data'][0]['id'] + '.jpeg'
-          image_url = user_media['data'][0]['images']['standard_resolution']['url']
-          #now we are download the post of user
-          urllib.urlretrieve(image_url, image_name)
-          return user_media['data'][0]['id']
-          print 'Your image has been downloaded!'
-        else:
-          print 'Post does not exist!'
+      user_id = get_user_id(insta_username)
+      if user_id == None:
+        print 'User does not exist!'
+        exit()
       else:
-        print 'Status code other than 200 received!'
-    except:
-        KeyError
+        try:
+          request_url = (BASE_URL + 'users/%s/media/recent/?access_token=%s') % (user_id, APP_ACCESS_TOKEN)
+          print "get request url :%s"%request_url
+          user_media = requests.get(request_url).json()
+        except:
+            print"get request is not working"
+        try:
+          if user_media['meta']['code'] == 200:
+            if len(user_media['data']):
+              image_name = user_media['data'][0]['id'] + '.jpeg'
+              image_url = user_media['data'][0]['images']['standard_resolution']['url']
+              #now we are download the post of user
+              urllib.urlretrieve(image_url, image_name)
+              return user_media['data'][0]['id']
+              print 'Your image has been downloaded!'
+            else:
+              print 'Post does not exist!'
+          else:
+            print 'Status code other than 200 received!'
+        except:
+            KeyError
       #this function for get the informtion of other user
 def get_user_info(insta_username):
   user_id = get_user_id(insta_username)
@@ -112,8 +111,7 @@ def get_user_info(insta_username):
         print"get request is not working"
     try:
       if user_info['meta']['code'] == 200:
-        if len(user_info['data']):
-          #get the infomtion of instgram user
+        if len(user_info['data']):#get the infomtion of instgram user
           print 'Username: %s' % (user_info['data']['username'])
           print 'No. of followers: %s' % (user_info['data']['counts']['followed_by'])
           print 'No. of people you are following: %s' % (user_info['data']['counts']['follows'])
@@ -187,7 +185,7 @@ def comment_on_post(insta_username):
                 comment_text = raw_input("Your comment: ")
                 payload = {"access_token": APP_ACCESS_TOKEN, "text" : comment_text}
                 request_url = (BASE_URL + 'media/%s/comments') % (media_id)
-                print colored('POST request url : %s' ,'bule'% (request_url))
+                print colored('POST request url : %s' ,'blue'% (request_url))
 
                 make_comment = requests.post(request_url, payload).json()
             except:
@@ -262,18 +260,19 @@ def get_like_list(insta_username):
     if user_id==None:
         print'invailed user name'
     else:
-        media_id=get_own_post()
+        media_id=get_media_id(user_id)
         if media_id==None:
             print "no media found"
         else:
-            try:
-                request_url=(BASE_URL+'media/%s/like/?access_token=%s')%(media_id,APP_ACCESS_TOKEN)
-                payload = {"access_token": APP_ACCESS_TOKEN}
-                print'Get request url : %s'%(request_url)
-                post_a_like = requests.get(request_url, payload).json()
-            except:
+           try:
+                request_url=(BASE_URL + 'media/%s/like/?access_token=%s')%(media_id , APP_ACCESS_TOKEN)
+                print 'Get request url : %s'%(request_url)
+                post_a_like = requests.get(request_url).json()
+
+           except:
                 print'request is not working'
-            try:
+
+           try:
                 if post_a_like['meta']['code'] == 200:
                      if len(post_a_like):
                          a=0
@@ -281,10 +280,10 @@ def get_like_list(insta_username):
                                 print "%s like : "%(post_a_like["data"][a]["from"]["username"])
                                 a=a+1
                      else:
-                        print "no data"
+                      print "no data"
                 else:
-                     print"code not 200"
-            except:
+                  print"code not 200"
+           except:
                 print KeyError
 #this function is use for download the recent image liked by owner
 def recent_media_liked():
@@ -409,8 +408,7 @@ def delete_negative_comment(insta_username):
                                                          'id'] + '.jpeg'  # fetching post id from data and storing it in image_name with .jpeg extension
                                         image_url = get_img['data'][0]['images']['standard_resolution'][
                                             'url']  # getting url of post and storing in image_url
-                                        urllib.urlretrieve(image_url,
-                                                           image_name)  # retriving the image from image_url and saving in image_name
+                                        urllib.urlretrieve(image_url,image_name)  # retriving the image from image_url and saving in image_name
                                         print colored('Your image has been downloaded! :) ', "green")  # SUCCESS MESSASGE
                                 elif choice == '3':
                                     StartBot()
