@@ -7,6 +7,7 @@ APP_ACCESS_TOKEN = '4777564375.e5bdecf.cf7da029386947f1be3f647066303471'
 #it is the base url of instabot
 BASE_URL = 'https://api.instagram.com/v1/'
 #this funtion is use for collecting the informtion of over
+a = []
 def self_info():
     try:
         request_url = (BASE_URL + 'users/self/?access_token=%s') % (APP_ACCESS_TOKEN)
@@ -131,7 +132,7 @@ def get_media_id(user_id):
         print "The GET request url is %s" % (request_url)       # display the GET url
         user_info = requests.get(request_url).json()        # requesting to get the data from the url above mentioned using requests package and using json()
     except:
-        print ("GET request isn't working properly", "red")  # print this when get request isn't correct
+        print ("GET request isn't working properly")  # print this when get request isn't correct
 
     try:
         if user_info['meta']['code'] == 200:       # checking the status code of request. if 200 then it is accepted otherwise the else part will work
@@ -158,8 +159,8 @@ def like_a_post(insta_username):
           try:
                 request_url = (BASE_URL + 'media/%s/likes') % (media_id)
                 payload = {"access_token": APP_ACCESS_TOKEN}
-                print colored('POST request url : %s','green' % (request_url))
-                post_a_like = requests.post(request_url, payload).json()
+                print ('POST request url : %s' % (request_url))
+                post_a_like = requests.post(request_url,payload).json()
           except:
               print colored("request is not working",'red')
           try:
@@ -185,7 +186,7 @@ def comment_on_post(insta_username):
                 comment_text = raw_input("Your comment: ")
                 payload = {"access_token": APP_ACCESS_TOKEN, "text" : comment_text}
                 request_url = (BASE_URL + 'media/%s/comments') % (media_id)
-                print colored('POST request url : %s' ,'blue'% (request_url))
+                print('POST request url : %s' % (request_url))
 
                 make_comment = requests.post(request_url, payload).json()
             except:
@@ -210,7 +211,7 @@ def own_comment_info():
             print"no medaia found"
         else:
             try:
-                request_url = (BASE_URL + 'media/%s/comments/?access_token=%s') % (media_id, APP_ACCESS_TOKEN)
+                request_url = (BASE_URL + 'media/%s/comments?access_token=%s') % (media_id, APP_ACCESS_TOKEN)
                 print 'GET request url : %s' % (request_url)
                 comment_info1 = requests.get(request_url).json()
             except:
@@ -265,30 +266,28 @@ def get_like_list(insta_username):
             print "no media found"
         else:
            try:
-                request_url=(BASE_URL + 'media/%s/like/?access_token=%s')%(media_id , APP_ACCESS_TOKEN)
+                request_url=(BASE_URL + 'media/%s/likes?access_token=%s')%(media_id , APP_ACCESS_TOKEN)
                 print 'Get request url : %s'%(request_url)
-                post_a_like = requests.get(request_url).json()
+                like_list = requests.get(request_url).json()
 
            except:
                 print'request is not working'
-
            try:
-                if post_a_like['meta']['code'] == 200:
-                     if len(post_a_like):
-                         a=0
-                         while a<len(post_a_like):
-                                print "%s like : "%(post_a_like["data"][a]["from"]["username"])
-                                a=a+1
-                     else:
-                      print "no data"
-                else:
-                  print"code not 200"
+               if (like_list['meta']['code'] == 200):
+                   if (like_list['data']):
+                       for a in range(0, len(like_list['data'])):
+                           print like_list['data'][a]['username']
+                   else:
+                       print(colored("like doesn't exsist.", 'red'))
+               else:
+                   print(colored("status code other than 200.", 'red'))
+
            except:
-                print KeyError
+              print KeyError
 #this function is use for download the recent image liked by owner
 def recent_media_liked():
     try:
-        request_url=(BASE_URL +"user/self/media/liked?accec_token=%s")%APP_ACCESS_TOKEN
+        request_url=(BASE_URL +"users/self/media/liked?access_token=%s")%APP_ACCESS_TOKEN
         print'the get request url is %s'%request_url
         liked_post=requests.get(request_url).json()
     except:
@@ -309,30 +308,28 @@ def recent_media_liked():
 
 #this for geting the comment on post
 def get_comment_list(insta_username):
-     user_id=get_user_id(insta_username)
+     user_id= get_user_id(insta_username)
      if user_id==None:
          print 'invaild user name'
      else:
-         media_id = get_own_post()
+         media_id = get_media_id(user_id)
          if media_id==None:
              print'no media found'
          else:
              try:
-                request_url = (BASE_URL + 'media/%s/comments/?access_token=%s') % (media_id, APP_ACCESS_TOKEN)
+                request_url = (BASE_URL + 'media/%s/comments?access_token=%s') % (media_id, APP_ACCESS_TOKEN)
                 print 'GET request url : %s' % (request_url)
                 comment_info = requests.get(request_url).json()
              except:
                  print'request is not working'
              try:
-                 if comment_info['meta']['code'] == 200:
-                     if len(comment_info):
-                         a=0
-                         while a<len(comment_info):
-                                print "%s commented : %s"%(comment_info["data"][a]["from"][""],comment_info["data"][a]["text"])
-                                a=a+1
-                     else:
-                         print "no data"
-                 else:
+                if comment_info['meta']['code'] == 200:
+                    for i, d in enumerate(comment_info["data"]):
+                        print d["text"]
+                        a.append(d["text"])
+                    return a
+
+                else:
                      print"code not 200"
              except:
                  print KeyError
@@ -347,7 +344,7 @@ def delete_negative_comment(insta_username):
             print'no media found'
         else:
             try:
-                request_url = (BASE_URL + 'media/%s/comments/?access_token=%s') % (media_id, APP_ACCESS_TOKEN)
+                request_url = (BASE_URL + 'media/%s/comments?access_token=%s') % (media_id, APP_ACCESS_TOKEN)
                 print 'GET request url : %s' % (request_url)
                 comments_info= requests.get(request_url).json()
             except:
@@ -365,15 +362,12 @@ def delete_negative_comment(insta_username):
 
                                 print colored("Your comment is %s :(", "red") % comment_list  # print if negtive comment
                                 try:
-                                    request_url = (BASE_URL + 'media/%s/comments/%s/?access_token=%s') % (
-                                    media_id, comment_id, APP_ACCESS_TOKEN)  # url for getting the commments
+                                    request_url = (BASE_URL + 'media/%s/comments/%s/?access_token=%s') % (media_id, comment_id, APP_ACCESS_TOKEN)  # url for getting the commments
                                     print "Delete request url :%s" % (request_url)  # dislay url
-                                    del_info = requests.delete(
-                                        request_url).json()  # deleting the data of the url above mentioned using requests package and using json()
+                                    del_info = requests.delete(request_url).json()  # deleting the data of the url above mentioned using requests package and using json()
                                 except:
                                     print colored("Request URL not coorect!", "red")  # print when url not correct
-                                if del_info['meta'][
-                                    'code'] == 200:  # checking the status code of request. if 200 then it is accepted otherwise the else part will work
+                                if del_info['meta']['code'] == 200:  # checking the status code of request. if 200 then it is accepted otherwise the else part will work
                                     print colored("Comment deleted :) ", "green")  # print when sucessful in deleting negative comments
                                 else:
                                     print colored("Unable to delete comment :", "red")  # print when unsucess in deleting comments
@@ -382,7 +376,7 @@ def delete_negative_comment(insta_username):
                                 choice = raw_input(colored("1.Do you want to delete this comment ? \n 2.Do you want to download this image? \n 3.Do want to go back to Mai", "blue"))
                             if choice == "1":
                                 try:
-                                    request_url = (BASE_URL + 'media/%s/comments/%s/?access_token=%s') % (
+                                    request_url = (BASE_URL + 'media/%s/comments/%s?access_token=%s') % (
                                     media_id, comment_id, APP_ACCESS_TOKEN)
                                     print "Delete request url :%s" % (request_url)
                                     del_info = requests.delete(
@@ -401,13 +395,10 @@ def delete_negative_comment(insta_username):
                                     get_img = requests.get(request_url).json()  # deleting the data of the url above mentioned using requests package and using json()
                                 except:
                                     print colored("Request URL not coorect!", "red")  # print when url not correct
-                                if (get_img['meta'][
-                                        'code']) == 200:  # checking the status code of request. if 200 then it is accepted otherwise the else part will work
+                                if (get_img['meta']['code']) == 200:  # checking the status code of request. if 200 then it is accepted otherwise the else part will work
                                     if len(get_img['data']):  # checking if we have anything in data of friend's id
-                                        image_name = get_img['data'][0][
-                                                         'id'] + '.jpeg'  # fetching post id from data and storing it in image_name with .jpeg extension
-                                        image_url = get_img['data'][0]['images']['standard_resolution'][
-                                            'url']  # getting url of post and storing in image_url
+                                        image_name = get_img['data'][0]['id'] + '.jpeg'  # fetching post id from data and storing it in image_name with .jpeg extension
+                                        image_url = get_img['data'][0]['images']['standard_resolution']['url']  # getting url of post and storing in image_url
                                         urllib.urlretrieve(image_url,image_name)  # retriving the image from image_url and saving in image_name
                                         print colored('Your image has been downloaded! :) ', "green")  # SUCCESS MESSASGE
                                 elif choice == '3':
@@ -462,7 +453,7 @@ def choose():
             print colored("Invalid username :(",'red')      #if user_id returned from get_user_id() is none then print invalid user!.
         else:
             try:
-                request_url = (BASE_URL + 'users/%s/media/recent/?access_token=%s') % (user_id, APP_ACCESS_TOKEN)   # getting users media list from "user/user_id/media/recent" end point
+                request_url = (BASE_URL + 'users/%s/media/recent?access_token=%s') % (user_id, APP_ACCESS_TOKEN)   # getting users media list from "user/user_id/media/recent" end point
                 print "Get url is: %s" % (request_url)      # display the GET url
                 user_media = requests.get(request_url).json()       # requesting to get the data from the url above mentioned using requests package and using json()
             except:
@@ -524,8 +515,7 @@ def choose():
                 if media_list['meta'][
                     'code'] == 200:  # checking the status code of request. if 200 then it is accepted otherwise the else part will work
                     if len(media_list['data']):  # checking if we have anything in data of user's id
-                        word = raw_input(colored("Enter the word you want to search in caption : ",
-                                                 "green"))  # get the word you want to search in caption or hashtag
+                        word = raw_input(colored("Enter the word you want to search in caption : ","green"))  # get the word you want to search in caption or hashtag
                         list = []  # creating list
                         for i in range(len(media_list['data'])):  # for every i the data list
                             if media_list['data'][i]['caption'] != None:  # checking if caption is there or not
@@ -578,7 +568,7 @@ def StartBot():
         print "d.Get user's recent post by username\n"
         print "e.Get list of people who has liked your posts\n"
         print "f.Like the post of your friend\n"
-        print "g.get list of recent comment on your post\n "
+        print "g.get comment list\n "
         print "h.Comment on post\n"
         print "i.Delete negative comments \n"
         print"j.unlike user post"
@@ -628,3 +618,8 @@ def StartBot():
             print(colored("You have entered a wrong choice !Try Again",'red'))
 
 StartBot()
+#sandbox user
+#amitrawat5188	admin
+#raj_2802
+#manirajyadav
+#rvt_surbhi
