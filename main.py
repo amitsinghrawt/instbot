@@ -200,37 +200,6 @@ def comment_on_post(insta_username):
                 print KeyError
 
 
-def own_comment_info():
-    #this fuction is use for comment on self post
-     user_id=get_own_post()
-     if user_id==None:
-         print "invaied user id"
-     else:
-        media_id = get_media_id(user_id)
-        if media_id==None:
-            print"no medaia found"
-        else:
-            try:
-                request_url = (BASE_URL + 'media/%s/comments?access_token=%s') % (media_id, APP_ACCESS_TOKEN)
-                print 'GET request url : %s' % (request_url)
-                comment_info1 = requests.get(request_url).json()
-            except:
-                print"request is not working"
-            try:
-                 if comment_info1['meta']['code'] == 200:
-                     if len(comment_info1):
-                         a = 0
-                         for a in range(0,len(comment_info1["data"])):
-                             print "%s commented : %s" % (comment_info1["data"][a]["from"]["username"], comment_info1["data"][a]["text"])
-                             a = a + 1
-                     else:
-                         print "no data"
-                 else:
-                   print"code not 200"
-            except:
-               print KeyError
-
-
 def unlike_a_post(insta_username):
     # This function gets input as instagram username of your friend and unlike the recent post of your friend
     user_id = get_user_id(insta_username)         #calling get_user_id()
@@ -273,10 +242,10 @@ def get_like_list(insta_username):
            except:
                 print'request is not working'
            try:
-               if (like_list['meta']['code'] == 200):
+               if(like_list['meta']['code'] == 200):
                    if (like_list['data']):
-                       for a in range(0, len(like_list['data'])):
-                           print like_list['data'][a]['username']
+                       for b in range(0, len(like_list['data'])):
+                           print like_list['data'][b]['username']
                    else:
                        print(colored("like doesn't exsist.", 'red'))
                else:
@@ -447,8 +416,8 @@ def choose():
     print colored("b.Choose any recent post by tag of user","yellow")
     choice=raw_input("Enter your choice: ")         #taking choice input from user and storing in choice variable
     if choice=='a':
-        instaname=raw_input("Enter the username")
-        user_id=get_user_id(instaname)          #calling get_user_id() and passing the user's instagram name as parameter
+        insta_username=raw_input("Enter the username")
+        user_id=get_user_id(insta_username)          #calling get_user_id() and passing the user's instagram name as parameter
         if user_id==None:
             print colored("Invalid username :(",'red')      #if user_id returned from get_user_id() is none then print invalid user!.
         else:
@@ -487,40 +456,34 @@ def choose():
                         elif choice=="3":
                             StartBot()          #going back to main menu
                         else:
-                            print colored("Enter the correct choice :( ","red")     #print when wrong choice entered
+                            print colored("Enter the correct choice : ","red")     #print when wrong choice entered
                     else:
-                        print colored("There is no data :(", "red")  # print when no data
+                        print colored("There is no data :", "red")  # print when no data
                 else:
                     print colored("The request url is not in accepted state","red")  # print when status is in "not accepted" state
             except:
                 KeyError  # catching Key error
                 print KeyError  # printing keyerror
     elif choice == 'b':
-        username = raw_input(
-            colored("Enter the username whose post you want to choose using caption?", "blue"))  # getting username
+        username = raw_input(colored("Enter the username whose post you want to choose using caption?", "blue"))  # getting username
         user_id = get_user_id(username)  # fetching user id from get_user_id() function
         if user_id == None:
-            print colored("Invalid user :( ",
-                          "red")  # if user_id returned from get_user_id() is none then print invalid user!.
+            print colored("Invalid user : ","red")  # if user_id returned from get_user_id() is none then print invalid user!.
         else:
             try:
-                request_url = (BASE_URL + 'users/%s/media/recent?access_token=%s') % (
-                user_id,APP_ACCESS_TOKEN)  # getting users media list from "user/user_id/media/recent"
+                request_url = (BASE_URL + 'users/%s/media/recent?access_token=%s') % (user_id,APP_ACCESS_TOKEN)  # getting users media list from "user/user_id/media/recent"
                 print "GET request url: %s" % (request_url)  # print GET url
-                media_list = requests.get(
-                    request_url).json()  # requesting to get the data from the url above mentioned using requests package and using json()
+                media_list = requests.get(request_url).json()  # requesting to get the data from the url above mentioned using requests package and using json()
             except:
                 print colored("GET request is not working properly", "red")  # print when incorrect url
             try:
-                if media_list['meta'][
-                    'code'] == 200:  # checking the status code of request. if 200 then it is accepted otherwise the else part will work
+                if media_list['meta']['code'] == 200:  # checking the status code of request. if 200 then it is accepted otherwise the else part will work
                     if len(media_list['data']):  # checking if we have anything in data of user's id
                         word = raw_input(colored("Enter the word you want to search in caption : ","green"))  # get the word you want to search in caption or hashtag
                         list = []  # creating list
                         for i in range(len(media_list['data'])):  # for every i the data list
                             if media_list['data'][i]['caption'] != None:  # checking if caption is there or not
-                                caption = media_list['data'][i]['caption'][
-                                    'text']  # if caption is present then store it in variable
+                                caption = media_list['data'][i]['caption']['text']  # if caption is present then store it in variable
                                 list.append(caption)  # appending the caption in list
                             else:
                                 print colored("You dont have any caption ", "red")  # print if no caption present
@@ -533,11 +496,9 @@ def choose():
                                     if choice.upper() == "Y":  # if yes then download
                                         id = media_list['data'][i]['id']  # fetching id
                                         image_name = id + '.jpeg'
-                                        image_url = media_list['data'][i]['images']['standard_resolution'][
-                                            'url']  # fetching url
+                                        image_url = media_list['data'][i]['images']['standard_resolution']['url']  # fetching url
                                         urllib.urlretrieve(image_url, image_name)  # downloading image
-                                        print colored('Your image has been downloaded!',
-                                                      'blue')  # print when image downloaded sucessfully
+                                        print colored('Your image has been downloaded!','blue')  # print when image downloaded sucessfully
                                     elif choice.upper() == "N":  # if no then return None
                                         return None
                                     else:
@@ -548,8 +509,7 @@ def choose():
                     else:
                         print colored("No data available!", 'red')  # print when no data
                 else:
-                    print colored("The request url is not in accepted state",
-                                  "red")  # print when status is in "not accepted" state
+                    print colored("The request url is not in accepted state","red")  # print when status is in "not accepted" state
             except:
                 KeyError  # Catching keyerror
                 print KeyError  # printing keyerror
